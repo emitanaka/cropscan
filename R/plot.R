@@ -75,7 +75,7 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
 
     rowh_max <- dims |>
       dplyr::summarise(rowh = max(nrow),
-                       .trial = row_no) |>
+                       .by = row_no) |>
       dplyr::pull(rowh)
 
     layout <- dims |>
