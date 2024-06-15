@@ -3,8 +3,8 @@
 plot.field <- function(data, fill = NULL) {
   row <- data %@% "row"
   col <- data %@% "col"
-  by <- data %@% "by"
-  plot_field(data, fill = {{ fill }}, row = row, col = col, by = by)
+  trial <- data %@% "trial"
+  plot_field(data, fill = {{ fill }}, row = row, col = col, trial = trial)
 }
 
 #' Plot field
@@ -12,22 +12,23 @@ plot.field <- function(data, fill = NULL) {
 #' @param data The data
 #' @param fill The fill variable.
 #' @param row,col The row and column name. If not supplied, it will try to detect one.
-#' @param by The division of the trial.
+#' @param trial The division of the trial.
 #' @param max_col The maximum number of columns to plot in a row if more than one trial.
-#' @param max_by The maximum number of trials.
+#' @param max_trial The maximum number of trials.
 #' @param max_cat The maximum number of categorical levels to plot (if fill is categorical).
 #' @export
-plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max_col = 40, max_by = 20, max_cat = 8) {
+plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, max_col = 40, max_trial = 20, max_cat = 8) {
 
   colq <- names(eval_select(enexpr(col), data)) %0% detect_row_name(data)
   rowq <- names(eval_select(enexpr(row), data)) %0% detect_col_name(data)
   fillq <- names(eval_select(enexpr(fill), data)) %0% detect_yield_name(data)
-  byq <- names(eval_select(enexpr(by), data)) %0% detect_trial_name(data) %0% NULL
+  trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
 
   if(missing(row) && inherits(data, "field")) rowq <- data %@% "row"
   if(missing(col) && inherits(data, "field")) colq <- data %@% "col"
+  if(missing(trial) && inherits(data, "field")) trialq <- data %@% "trial"
 
-  if(!is_observational_unit(data, !!!syms(c(rowq, colq, byq)))) cli::cli_abort("The row, col and by do not uniquely index the observation.")
+  if(!is_observational_unit(data, !!!syms(c(rowq, colq, trialq)))) cli::cli_abort("The row, col and trial do not uniquely index the observation.")
 
   data <- data |>
     dplyr::mutate(!!colq := factor(.data[[colq]]),
@@ -50,24 +51,22 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max
     g <- g + ggplot2::scale_fill_discrete(limits = sample(unique(data[[fillq]]), min(max_cat, ncat)))
   }
 
-  if(!all(is.null(byq))) {
+  if(!all(is.null(trialq))) {
 
     data_split <- data |>
-      group_split(!!!syms(byq))
+      group_split(!!!syms(trialq))
 
-    if(length(data_split) > max_by) {
-      data_split <- data_split[1:max_by]
-      cli::cli_alert_info("Too many levels in by, only the first {max_by} levels are plotted.")
+    if(length(data_split) > max_trial) {
+      data_split <- data_split[1:max_trial]
+      cli::cli_alert_info("Too many levels in trial, only the first {max_trial} levels are plotted.")
     }
-
-
 
     dims <- data_split |>
       lapply(function(.data) {
           dat <- data.frame(nrow = max(as.integer(.data[[rowq]]), na.rm = TRUE),
                             ncol = max(as.integer(.data[[colq]]), na.rm = TRUE))
-          for(aby in byq) {
-            dat[[aby]] <- unique(.data[[aby]])
+          for(atrial in trialq) {
+            dat[[atrial]] <- unique(.data[[atrial]])
           }
           dat
         }) |>
@@ -76,7 +75,7 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max
 
     rowh_max <- dims |>
       dplyr::summarise(rowh = max(nrow),
-                       .by = row_no) |>
+                       .trial = row_no) |>
       pull(rowh)
 
     layout <- dims |>
@@ -84,7 +83,7 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max
                     l = c(0, r[-n()]) + 1,
                     b = c(0, cumsum(rowh_max))[row_no] + nrow,
                     t = c(0, cumsum(rowh_max))[row_no] + 1,
-                    .by = row_no) |>
+                    .trial = row_no) |>
       dplyr::rowwise() |>
       dplyr::mutate(area = list(patchwork::area(t = t, l = l, r = r, b = b))) |>
       dplyr::pull(area) |>
@@ -92,14 +91,14 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max
 
 
 
-    #g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste(byq, collapse = "+"))))
+    #g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste(trialq, collapse = "+"))))
 
 
 
     gl <- data_split |>
       lapply(function(d) {
           title_with_names <- d |>
-            dplyr::select(!!!syms(byq)) |>
+            dplyr::select(!!!syms(trialq)) |>
             dplyr::slice(1) |>
             unlist()
 
@@ -123,15 +122,15 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, by = NULL, max
 
 
 #' @export
-plot_field_genotype <- function(data, row = NULL, col = NULL, by = NULL) {
+plot_field_genotype <- function(data, row = NULL, col = NULL, trial = NULL) {
   fill <- detect_genotype_name(data)
-  plot_field(data, fill = fill, row = row, col = col, by = by)
+  plot_field(data, fill = fill, row = row, col = col, trial = trial)
 }
 
 #' @export
-plot_field_yield <- function(data, row = NULL, col = NULL, by = NULL) {
+plot_field_yield <- function(data, row = NULL, col = NULL, trial = NULL) {
   fill <- detect_yield_name(data)
-  plot_field(data, fill = fill, row = row, col = col, by = by) +
+  plot_field(data, fill = fill, row = row, col = col, trial = trial) +
     ggplot2::scale_fill_distiller(palette = "Greens", direction = 1)
 
 }

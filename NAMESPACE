@@ -2,6 +2,7 @@
 
 S3method(plot,field)
 S3method(tbl_sum,field)
+export(as_field)
 export(field)
 export(is_observational_unit)
 export(plot_field)

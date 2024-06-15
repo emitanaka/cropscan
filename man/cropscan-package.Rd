@@ -8,6 +8,14 @@
 \description{
 Initial data analysis for crop field experiments.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/emitanaka/cropscan}
+  \item Report bugs at \url{https://github.com/emitanaka/cropscan/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Emi Tanaka \email{dr.emi.tanaka@gmail.com} (\href{https://orcid.org/0000-0002-1455-259X}{ORCID}) [copyright holder]
 
