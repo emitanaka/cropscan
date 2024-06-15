@@ -5,7 +5,7 @@
 #' @param ... The columns in the data frame that potentially index the observational unit.
 #' @return A logical value.
 #' @export
-is_observational_unit <- function(.data, ...) {
+is_observational_unit <- function(.data, ..., .message = TRUE) {
 
   N <- nrow(.data)
   n <- .data |>
@@ -16,7 +16,7 @@ is_observational_unit <- function(.data, ...) {
 
   if(res) {
     ## Check if any are redundant
-    sel_cols <- tidyselect::eval_select(rlang::expr(c(...)), .data)
+    sel_cols <- tidyselect::eval_select(expr(c(...)), .data)
     for(icol in seq_along(sel_cols)) {
       .n <- .data |>
         dplyr::select(sel_cols[-icol]) |>
@@ -27,7 +27,7 @@ is_observational_unit <- function(.data, ...) {
     }
   }
 
-  if(interactive()) {
+  if(.message) {
     if(res) cli::cli_alert_success("Identifies observational unit")
     else cli::cli_alert_danger("Not the observational unit")
   }
@@ -36,4 +36,3 @@ is_observational_unit <- function(.data, ...) {
 }
 
 
-format_var <- function(x) cli::col_blue(paste0("`", x, "`"))

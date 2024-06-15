@@ -4,12 +4,12 @@
 \alias{is_observational_unit}
 \title{Is it observational unit?}
 \usage{
-is_observational_unit(.data, ...)
+is_observational_unit(.data, ..., .message = TRUE)
 }
 \arguments{
 \item{.data}{The data frame}
 
-\item{...}{The columns in the data frame that potententially index the observational unit.}
+\item{...}{The columns in the data frame that potentially index the observational unit.}
 }
 \value{
 A logical value.

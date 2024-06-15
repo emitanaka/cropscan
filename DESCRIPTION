@@ -4,18 +4,23 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Emi", "Tanaka", , "dr.emi.tanaka@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-1455-259X"))
-Description: Simple checks for crop field experiments prior to its analysis.
+Description: Initial data analysis for crop field experiments. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.1.9000
 Imports: 
     cli,
     dplyr,
     ggplot2,
+    patchwork,
     rlang,
+    tibble,
     tidyselect
 Suggests: 
     agridat,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
+LazyData: true
