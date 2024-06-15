@@ -24,8 +24,8 @@ field <- function(nrow = 1, ncol = 1, ntrial = 1) {
 
 #' @export
 as_field <- function(data, row = NULL, col = NULL, trial = NULL, ...) {
-  colq <- names(eval_select(enexpr(col), data)) %0% detect_row_name(data)
-  rowq <- names(eval_select(enexpr(row), data)) %0% detect_col_name(data)
+  colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
+  rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
   trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
   tibble::new_tibble(data,
                      class = "field",

@@ -1,10 +1,10 @@
 
 #' @export
-plot.field <- function(data, fill = NULL) {
+plot.field <- function(data, fill = NULL, ...) {
   row <- data %@% "row"
   col <- data %@% "col"
   trial <- data %@% "trial"
-  plot_field(data, fill = {{ fill }}, row = row, col = col, trial = trial)
+  plot_field(data, fill = {{ fill }}, row = row, col = col, trial = trial, ...)
 }
 
 #' Plot field
@@ -19,14 +19,14 @@ plot.field <- function(data, fill = NULL) {
 #' @export
 plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, max_col = 40, max_trial = 20, max_cat = 8) {
 
-  colq <- names(eval_select(enexpr(col), data)) %0% detect_row_name(data)
-  rowq <- names(eval_select(enexpr(row), data)) %0% detect_col_name(data)
+  colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
+  rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
   fillq <- names(eval_select(enexpr(fill), data)) %0% detect_yield_name(data)
   trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
 
-  if(missing(row) && inherits(data, "field")) rowq <- data %@% "row"
-  if(missing(col) && inherits(data, "field")) colq <- data %@% "col"
-  if(missing(trial) && inherits(data, "field")) trialq <- data %@% "trial"
+  if(missing(row) && inherits(data, "field")) rowq <- data %@% ".row"
+  if(missing(col) && inherits(data, "field")) colq <- data %@% ".col"
+  if(missing(trial) && inherits(data, "field")) trialq <- data %@% ".trial"
 
   if(!is_observational_unit(data, !!!syms(c(rowq, colq, trialq)))) cli::cli_abort("The row, col and trial do not uniquely index the observation.")
 
@@ -54,7 +54,7 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
   if(!all(is.null(trialq))) {
 
     data_split <- data |>
-      group_split(!!!syms(trialq))
+      dplyr::group_split(!!!syms(trialq))
 
     if(length(data_split) > max_trial) {
       data_split <- data_split[1:max_trial]
@@ -76,19 +76,18 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
     rowh_max <- dims |>
       dplyr::summarise(rowh = max(nrow),
                        .trial = row_no) |>
-      pull(rowh)
+      dplyr::pull(rowh)
 
     layout <- dims |>
       dplyr::mutate(r = cumsum(ncol),
-                    l = c(0, r[-n()]) + 1,
+                    l = c(0, r[-dplyr::n()]) + 1,
                     b = c(0, cumsum(rowh_max))[row_no] + nrow,
                     t = c(0, cumsum(rowh_max))[row_no] + 1,
-                    .trial = row_no) |>
+                    .by = row_no) |>
       dplyr::rowwise() |>
       dplyr::mutate(area = list(patchwork::area(t = t, l = l, r = r, b = b))) |>
       dplyr::pull(area) |>
       Reduce("c", x = _)
-
 
 
     #g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste(trialq, collapse = "+"))))
