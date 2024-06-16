@@ -38,11 +38,15 @@ as_field <- function(data, row = NULL, col = NULL, trial = NULL, ...) {
 #' @importFrom tibble tbl_sum
 #' @export
 tbl_sum.field <- function(x, ...) {
-  c(NextMethod(), "Dimension" = paste0(dplyr::n_distinct(x[[x %@% ".row"]]), " rows ",
+  c(NextMethod(), "Dimension" = paste0(max(as.integer(as.character(x[[x %@% ".row"]], na.rm = TRUE))), " rows ",
                                        mult_sign(), " ",
-                                       dplyr::n_distinct(x[[x %@% ".col"]]), " cols ",
-                                       if(!is.null(x %@% ".trial")) paste0(mult_sign(), " ",
-                                                                        dplyr::n_distinct(x[[x %@% ".trial"]]), " trials")))
+                                       max(as.integer(as.character(x[[x %@% ".col"]], na.rm = TRUE))), " cols ",
+                                       if(!is.null(x %@% ".trial")) {
+                                         ntrials <- x |>
+                                           dplyr::distinct(!!!syms(x %@% ".trial")) |>
+                                           nrow()
+                                         paste0(mult_sign(), " ", ntrials, " trials")
+                                        }))
 }
 
 
