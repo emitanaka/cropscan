@@ -38,9 +38,9 @@ as_field <- function(data, row = NULL, col = NULL, trial = NULL, ...) {
 #' @importFrom tibble tbl_sum
 #' @export
 tbl_sum.field <- function(x, ...) {
-  c(NextMethod(), "Dimension" = paste0(max(as.integer(as.character(x[[x %@% ".row"]], na.rm = TRUE))), " rows ",
+  c(NextMethod(), "Dimension" = paste0(max(as.integer(as.character(x[[x %@% ".row"]])), na.rm = TRUE), " rows ",
                                        mult_sign(), " ",
-                                       max(as.integer(as.character(x[[x %@% ".col"]], na.rm = TRUE))), " cols ",
+                                       max(as.integer(as.character(x[[x %@% ".col"]])), na.rm = TRUE), " cols ",
                                        if(!is.null(x %@% ".trial")) {
                                          ntrials <- x |>
                                            dplyr::distinct(!!!syms(x %@% ".trial")) |>
