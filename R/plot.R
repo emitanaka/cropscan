@@ -23,6 +23,9 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
   rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
   fillq <- names(eval_select(enexpr(fill), data)) %0% detect_yield_name(data)
   trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
+  if(any(is.na(fillq))) {
+    fillq <- detect_genotype_name(data)
+  }
 
   if(missing(row) && inherits(data, "field")) rowq <- data %@% ".row"
   if(missing(col) && inherits(data, "field")) colq <- data %@% ".col"

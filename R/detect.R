@@ -10,7 +10,7 @@ detect_name <- function(.data, possible_names, what = "name", error = TRUE, mess
 }
 
 
-COMMON_NAMES <- list(trial = c("trial", "site", "year", "loc", "location", "env"),
+COMMON_NAMES <- list(trial = c("trial", "site", "year", "loc", "location", "env", "expt", "county"),
                      row = c("row"),
                      col = c("col", "column", "range"),
                      yield = c("response", "y", "yield"))
