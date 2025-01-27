@@ -3,6 +3,8 @@
 S3method(plot,field)
 S3method(tbl_sum,field)
 export(as_field)
+export(cols_all_unique)
+export(cols_bijective)
 export(cols_constant)
 export(cols_missing)
 export(field)

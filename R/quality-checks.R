@@ -32,7 +32,7 @@ is_observational_unit <- function(.data, ..., .message = TRUE) {
     else cli::cli_alert_danger("Not the observational unit")
   }
 
-  invisible(res)
+  res
 }
 
 #' Identify constant columns
@@ -117,4 +117,73 @@ rows_missing <- function(data, cutoff = 1) {
     return(NA)
   }
   which(rows)
+}
+
+get_one_to_one_value_order <- function (x) {
+  if (any(is.na(x))) {
+    new_value <- as.integer(factor(x))
+    new_value[is.na(new_value)] <- -1L
+    ulevels <- unique(new_value)
+    new_value <- as.integer(factor(new_value, levels = ulevels))
+  }
+  else {
+    # same as janitor:::get_one_to_one_value_order
+    # but below line is changed to as.character(x)
+    # must be character as it can cause duplicated levels below sometimes
+    ulevels <- unique(as.character(x))
+    new_value <- as.integer(factor(x, levels = ulevels))
+  }
+  new_value
+}
+
+#' Identify columns with all unique values
+#'
+#' @param data The data frame
+#' @return A character vector of column names with all unique values.
+#' @export
+cols_all_unique <- function(data) {
+  cols <- sapply(data, function(x) length(unique(x)) == nrow(data))
+  if(!any(cols)) {
+    cli::cli_alert("No columns with all unique values.")
+    return(NA)
+  }
+  colnames(data)[cols]
+}
+
+#' Identify bijective (one-to-one correspondence) columns
+#'
+#' Any values that have all unique values will not be included in the
+#' output.
+#'
+#' @param data The data frame
+#' @return A list of character vectors of bijective columns.
+#' @export
+cols_bijective <- function(data) {
+    stopifnot(ncol(data) > 0)
+    stopifnot(!any(duplicated(names(data))))
+    ndistinct_cols <- sapply(data, function(x) length(unique(x)))
+    data_alt <- data[, ndistinct_cols < nrow(data), drop = FALSE]
+    for (idx in seq_along(data_alt)) {
+      data_alt[[idx]] <- get_one_to_one_value_order(data_alt[[idx]])
+    }
+    remaining_cols <- names(data_alt)
+    ret <- list()
+    while (length(remaining_cols) > 0) {
+      nm1 <- remaining_cols[1]
+      remaining_cols <- remaining_cols[-1]
+      current_ret <- nm1
+      for (nm2 in remaining_cols) {
+        if (identical(data_alt[[nm1]], data_alt[[nm2]])) {
+          current_ret <- c(current_ret, nm2)
+          remaining_cols <- setdiff(remaining_cols, nm2)
+        }
+      }
+      if (length(current_ret) > 1) {
+        ret[[length(ret) + 1]] <- current_ret
+      }
+    }
+    if (length(ret) == 0) {
+      cli::cli_alert("No bijective columns.")
+    }
+    ret
 }
