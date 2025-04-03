@@ -95,6 +95,7 @@ cols_missing <- function (data, cutoff = 1) {
   colnames(data)[cols]
 }
 
+
 #' Identify rows that have certain proportion of missing values
 #'
 #' Similar to janitor::remove_empty, except this function
@@ -186,4 +187,21 @@ cols_bijective <- function(data) {
       cli::cli_alert("No bijective columns.")
     }
     ret
+}
+
+
+#' Identify all columns with potential issues
+#'
+#' @inheritParams cols_missing
+#' @inheritParams cols_constant
+#' @export
+cols_identify_all <- function(data, cutoff = 1, na.rm = FALSE) {
+  cli::cli_h1("Checking if all values are unique in a column")
+  cols_all_unique(data)
+  cli::cli_h1("Checking if any two columns are bijective")
+  cols_bijective(data)
+  cli::cli_h1("Checking if any column is all constant")
+  cols_constant(data, na.rm = na.rm)
+  cli::cli_h1("Checking if columns with preset cut-off in missing values")
+  cols_missing(data, cutoff = cutoff)
 }
