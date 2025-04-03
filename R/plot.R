@@ -19,17 +19,19 @@ plot.field <- function(data, fill = NULL, ...) {
 #' @export
 plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, max_col = 40, max_trial = 20, max_cat = 8) {
 
-  colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
-  rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
+  if(inherits(data, "field")) {
+    if(missing(row)) rowq <- data %@% ".row"
+    if(missing(col)) colq <- data %@% ".col"
+    if(missing(trial)) trialq <- data %@% ".trial"
+  } else {
+    colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
+    rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
+    trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
+  }
   fillq <- names(eval_select(enexpr(fill), data)) %0% detect_yield_name(data)
-  trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
   if(any(is.na(fillq))) {
     fillq <- detect_genotype_name(data)
   }
-
-  if(missing(row) && inherits(data, "field")) rowq <- data %@% ".row"
-  if(missing(col) && inherits(data, "field")) colq <- data %@% ".col"
-  if(missing(trial) && inherits(data, "field")) trialq <- data %@% ".trial"
 
   if(!is_observational_unit(data, !!!syms(c(rowq, colq, trialq)))) cli::cli_abort("The row, col and trial do not uniquely index the observation.")
 
@@ -42,7 +44,8 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
     ggplot2::aes(x = .data[[colq]],
                  y = .data[[rowq]],
                  fill = .data[[fillq]]) +
-    ggplot2::geom_tile(color = "black", size = 1.2, show.legend = TRUE)
+    ggplot2::geom_tile(color = "black", size = 1.2, show.legend = TRUE) +
+    ggplot2::labs(x = colq, y = rowq, fill = fillq)
 
   if(is.numeric(data[[fillq]])) {
     g <- g + ggplot2::scale_fill_distiller(palette = "Greens", direction = 1,
@@ -108,15 +111,14 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
                           collapse = "\n")
 
           (g %+% d) + ggplot2::ggtitle(title) +
-            ggplot2::theme(panel.background = ggplot2::element_blank(),
-                           axis.title = ggplot2::element_blank())
+            ggplot2::theme(panel.background = ggplot2::element_blank())
         })
 
     #al <- patchwork::align_patches(gl)
 
     g <- patchwork::wrap_plots(gl, design = layout)
 
-    g <- g + patchwork::plot_layout(guides = "collect")
+    g <- g + patchwork::plot_layout(guides = "collect", axis_titles = "collect")
   }
 
   g
