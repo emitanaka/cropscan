@@ -194,14 +194,27 @@ cols_bijective <- function(data) {
 #'
 #' @inheritParams cols_missing
 #' @inheritParams cols_constant
+#' @param print Print the output or not.
 #' @export
-cols_identify_all <- function(data, cutoff = 1, na.rm = FALSE) {
-  cli::cli_h1("Checking if all values are unique in a column")
-  cols_all_unique(data)
-  cli::cli_h1("Checking if any two columns are bijective")
-  cols_bijective(data)
-  cli::cli_h1("Checking if any column is all constant")
-  cols_constant(data, na.rm = na.rm)
-  cli::cli_h1("Checking if columns with preset cut-off in missing values")
-  cols_missing(data, cutoff = cutoff)
+cols_identify_all <- function(data, cutoff = 1, na.rm = FALSE, print = TRUE) {
+  x1 <- cols_all_unique(data)
+  x2 <- cols_bijective(data)
+  x3 <- cols_constant(data, na.rm = na.rm)
+  x4 <- cols_missing(data, cutoff = cutoff)
+  ret <-  list(all_unique = x1,
+               bijective = x2,
+               constant = x3,
+               missings = x4)
+  if(print) {
+    cli::cli_h1("Checking if all values are unique in a column")
+    print(x1)
+    cli::cli_h1("Checking if any two columns are bijective")
+    print(x2)
+    cli::cli_h1("Checking if any column is all constant")
+    print(x3)
+    cli::cli_h1("Checking if columns with preset cut-off in missing values")
+    print(x4)
+    return(invisible(ret))
+  }
+  ret
 }
