@@ -1,8 +1,8 @@
 
 #' @export
-plot_ge <- function(data, gen = NULL, trial = NULL, resp = NULL) {
+plot_ge <- function(data, gen = NULL, env = NULL, resp = NULL) {
   respq <- names(eval_select(enexpr(resp), data)) %0% detect_yield_name(data)
-  trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
+  envq <- names(eval_select(enexpr(env), data)) %0% detect_env_name(data) %0% NULL
   genq <- names(eval_select(enexpr(gen), data)) %0% detect_genotype_name(data) %0% NULL
 
   g <- data |>
@@ -10,8 +10,8 @@ plot_ge <- function(data, gen = NULL, trial = NULL, resp = NULL) {
     ggplot2::ggplot(ggplot2::aes(.data[[respq]], gen)) +
     ggplot2::geom_point()
 
-  if(!any(is.null(trialq))) {
-    g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste0(trialq, collapse = "+"))))
+  if(!any(is.null(envq))) {
+    g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste0(envq, collapse = "+"))))
   }
 
   g

@@ -10,7 +10,7 @@ detect_name <- function(.data, possible_names, what = "name", error = TRUE, mess
 }
 
 
-COMMON_NAMES <- list(trial = c("trial", "site", "year", "loc", "location", "env", "expt", "county"),
+COMMON_NAMES <- list(env = c("trial", "site", "year", "loc", "location", "env", "expt", "county"),
                      row = c("row"),
                      col = c("col", "column", "range"),
                      yield = c("response", "y", "yield"))
@@ -35,8 +35,8 @@ detect_genotype_name <- function(.data) {
 }
 
 
-detect_trial_name <- function(.data) {
-  detect_name(.data, COMMON_NAMES$trial, "trial", error = FALSE)
+detect_env_name <- function(.data) {
+  detect_name(.data, COMMON_NAMES$env, "env", error = FALSE)
 }
 
 detect_row_name <- function(.data) {

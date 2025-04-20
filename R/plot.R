@@ -3,8 +3,8 @@
 plot.field <- function(data, fill = NULL, ...) {
   row <- data %@% "row"
   col <- data %@% "col"
-  trial <- data %@% "trial"
-  plot_field(data, fill = {{ fill }}, row = row, col = col, trial = trial, ...)
+  env <- data %@% "env"
+  plot_field(data, fill = {{ fill }}, row = row, col = col, env = env, ...)
 }
 
 #' Plot field
@@ -12,28 +12,30 @@ plot.field <- function(data, fill = NULL, ...) {
 #' @param data The data
 #' @param fill The fill variable.
 #' @param row,col The row and column name. If not supplied, it will try to detect one.
-#' @param trial The division of the trial.
-#' @param max_col The maximum number of columns to plot in a row if more than one trial.
-#' @param max_trial The maximum number of trials.
+#' @param env The division of the env.
+#' @param max_col The maximum number of columns to plot in a row if more than one env.
+#' @param max_env The maximum number of envs.
 #' @param max_cat The maximum number of categorical levels to plot (if fill is categorical).
 #' @export
-plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, max_col = 40, max_trial = 20, max_cat = 8) {
+plot_field <- function(data, fill = NULL, row = NULL, col = NULL, env = NULL, max_col = 40, max_env = 20, max_cat = 8) {
 
   if(inherits(data, "field")) {
-    if(missing(row)) rowq <- data %@% ".row"
-    if(missing(col)) colq <- data %@% ".col"
-    if(missing(trial)) trialq <- data %@% ".trial"
+    rowq <- row %||% data %@% ".row"
+    colq <- col %||% data %@% ".col"
+    envq <- env %||% data %@% ".env"
   } else {
     colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
     rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
-    trialq <- names(eval_select(enexpr(trial), data)) %0% detect_trial_name(data) %0% NULL
+    envq <- names(eval_select(enexpr(env), data)) %0% detect_env_name(data) %0% NULL
   }
   fillq <- names(eval_select(enexpr(fill), data)) %0% detect_yield_name(data)
   if(any(is.na(fillq))) {
     fillq <- detect_genotype_name(data)
   }
 
-  if(!is_observational_unit(data, !!!syms(c(rowq, colq, trialq)))) cli::cli_abort("The row, col and trial do not uniquely index the observation.")
+  if(!is_observational_unit(data, !!!syms(c(rowq, colq, envq)), .message = FALSE)) {
+    cli::cli_abort("The row, col and env do not uniquely index the observation.")
+  }
 
   data <- data |>
     dplyr::mutate(!!colq := factor(.data[[colq]]),
@@ -57,22 +59,22 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
     g <- g + ggplot2::scale_fill_discrete(limits = sample(unique(data[[fillq]]), min(max_cat, ncat)))
   }
 
-  if(!all(is.null(trialq))) {
+  if(!all(is.null(envq))) {
 
     data_split <- data |>
-      dplyr::group_split(!!!syms(trialq))
+      dplyr::group_split(!!!syms(envq))
 
-    if(length(data_split) > max_trial) {
-      data_split <- data_split[1:max_trial]
-      cli::cli_alert_info("Too many levels in trial, only the first {max_trial} levels are plotted.")
+    if(length(data_split) > max_env) {
+      data_split <- data_split[1:max_env]
+      cli::cli_alert_info("Too many levels in env, only the first {max_env} levels are plotted.")
     }
 
     dims <- data_split |>
       lapply(function(.data) {
           dat <- data.frame(nrow = max(as.integer(.data[[rowq]]), na.rm = TRUE),
                             ncol = max(as.integer(.data[[colq]]), na.rm = TRUE))
-          for(atrial in trialq) {
-            dat[[atrial]] <- unique(.data[[atrial]])
+          for(aenv in envq) {
+            dat[[aenv]] <- unique(.data[[aenv]])
           }
           dat
         }) |>
@@ -96,14 +98,14 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
       Reduce("c", x = _)
 
 
-    #g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste(trialq, collapse = "+"))))
+    #g <- g + ggplot2::facet_wrap(as.formula(paste0("~", paste(envq, collapse = "+"))))
 
 
 
     gl <- data_split |>
       lapply(function(d) {
           title_with_names <- d |>
-            dplyr::select(!!!syms(trialq)) |>
+            dplyr::select(!!!syms(envq)) |>
             dplyr::slice(1) |>
             unlist()
 
@@ -126,15 +128,15 @@ plot_field <- function(data, fill = NULL, row = NULL, col = NULL, trial = NULL, 
 
 
 #' @export
-plot_field_genotype <- function(data, row = NULL, col = NULL, trial = NULL) {
+plot_field_genotype <- function(data, row = NULL, col = NULL, env = NULL) {
   fill <- detect_genotype_name(data)
-  plot_field(data, fill = fill, row = row, col = col, trial = trial)
+  plot_field(data, fill = fill, row = row, col = col, env = env)
 }
 
 #' @export
-plot_field_yield <- function(data, row = NULL, col = NULL, trial = NULL) {
+plot_field_yield <- function(data, row = NULL, col = NULL, env = NULL) {
   fill <- detect_yield_name(data)
-  plot_field(data, fill = fill, row = row, col = col, trial = trial) +
+  plot_field(data, fill = fill, row = row, col = col, env = env) +
     ggplot2::scale_fill_distiller(palette = "Greens", direction = 1)
 
 }
