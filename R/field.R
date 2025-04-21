@@ -121,7 +121,7 @@ field_dim <- function(data, trt = NULL, row = NULL, col = NULL, env = NULL) {
   data |>
       dplyr::distinct(!!!syms(row), !!!syms(col), !!!syms(env), !!!syms(trt)) |>
       dplyr::summarise(n = dplyr::n(),
-                       across(c(row, col, trt), ~ dplyr::n_distinct(.x), .names = "n{.col}"),
+                       across(any_of(c(row, col, trt)), ~ dplyr::n_distinct(.x), .names = "n{.col}"),
                        # .row_min = min(as.numeric(as.character(.data[[row]]))),
                        # .col_min = min(as.numeric(as.character(.data[[col]]))),
                        # .row_max = max(as.numeric(as.character(.data[[row]]))),
