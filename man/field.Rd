@@ -7,12 +7,22 @@
 field(nrow = 1, ncol = 1, nenv = 1)
 }
 \arguments{
-\item{nrow}{The number of rows.}
+\item{nrow}{The number of rows. Must be a vector of the same size as \code{ncol} or 1.}
 
-\item{ncol}{The number of columns.}
+\item{ncol}{The number of columns. Must be a vector of the same size as \code{nrow} or 1.}
 
-\item{nenv}{The number of envs.}
+\item{nenv}{The number of environments. Unused if \code{nrow} or \code{ncol} is a vector of size greater than 1.}
 }
 \description{
-Construct a rectangular field
+The function constructs a rectangular field with the specified number of rows, columns, and environments.
+If \code{nrow} or \code{ncol} is a vector of length greater than 1, then each element is assumed to be an environment.
+}
+\details{
+If \code{nenv} is greater than 1 then every environment will have the same number of rows and columns.
+}
+\examples{
+field(12, 8) # A field of 12 rows x 8 columns.
+field(12, 8, 3) # Three fields of 12 rows x 8 columns.
+field(c(12, 8), 6) # Two fields of 12 rows x 6 columns and 8 rows x 6 columns.
+field(c(4, 3), c(5, 4)) # Two fields of 4 rows x 5 columns and 3 rows x 4 columns.
 }

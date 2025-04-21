@@ -16,7 +16,8 @@ Imports:
     patchwork,
     rlang,
     tibble,
-    tidyselect
+    tidyselect,
+    vctrs
 Suggests: 
     agridat,
     testthat (>= 3.0.0)
