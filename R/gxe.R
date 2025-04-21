@@ -33,7 +33,17 @@ concurrence_matrix <- function(data, gen = NULL, env = NULL) {
   gen <- names(eval_select(enexpr(gen), data)) %0% detect_genotype_name(data) %0% NULL
   env <- names(eval_select(enexpr(env), data)) %0% detect_env_name(data) %0% NULL
   tt <- table(data[[env]], data[[gen]]) > 0
-  tt %*% t(tt)
+  res <- tt %*% t(tt)
+  structure(res, class = c("concurrence_mat", class(res)))
+}
+
+#' @export
+print.concurrence_mat <- function(x, n = 10, ...) {
+  n <- min(c(n, nrow(x)))
+  if(n >= nrow(x)) msg <- ""
+  else msg <- glue::glue("Showing only {n} {mult_sign()} {n}.")
+  cli::cli_inform(c("i" = "Concurrence matrix: {nrow(x)} {mult_sign()} {nrow(x)} environments. {msg}"))
+  print(unclass(x)[1:n, 1:n])
 }
 
 
@@ -42,7 +52,7 @@ concurrence_matrix <- function(data, gen = NULL, env = NULL) {
 concurrence_table <- function(data, gen = NULL, env = NULL) {
   mat <- concurrence_matrix(data, gen, env)
   res <- as.data.frame(mat)
-  res |>
+  res <- res |>
     tibble::rownames_to_column("env1") |>
     tidyr::pivot_longer(-env1, names_to = "env2", values_to = "concurrence") |>
     dplyr::mutate(env1 = reorder(env1, concurrence),
@@ -51,6 +61,16 @@ concurrence_table <- function(data, gen = NULL, env = NULL) {
                   .by = env1) |>
     dplyr::mutate(prop_in_env2 = concurrence / sum(concurrence[env1 == env2]),
                   .by = env2)
+  tibble::new_tibble(res, class = "concurrence_tbl")
 }
+
+#' @export
+tbl_sum.concurrence_tbl <- function(x, ...) {
+  c(NextMethod(), "Dimension" = paste0(dplyr::n_distinct(x[["env1"]]),
+                                       " ", mult_sign(), " ",
+                                       dplyr::n_distinct(x[["env2"]]),
+                                       " environments"))
+}
+
 
 
