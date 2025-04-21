@@ -93,3 +93,39 @@ tbl_sum.field <- function(x, ...) {
 
 
 mult_sign <- function() cli::symbol$times
+
+
+
+#' Get the field dimensions
+#'
+#' @param data A data frame or a field object.
+#' @param trt A column names or expressions for treatment factors
+#' @param row A column names or expressions for row identifiers
+#' @param col A column names or expressions for column identifiers
+#' @param env A column names or expressions for environment identifiers
+#' @examples
+#' field_dim(met_pheno)
+#' field_dim(field(12, 8, 3))
+#' @export
+field_dim <- function(data, trt = NULL, row = NULL, col = NULL, env = NULL) {
+  if(inherits(data, "field")) {
+    row <- data %@% ".row"
+    col <- data %@% ".col"
+    env <- data %@% ".env"
+  } else {
+    row <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
+    col <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
+    env <- names(eval_select(enexpr(env), data)) %0% detect_env_name(data) %0% NULL
+  }
+  trt <- names(eval_select(enexpr(trt), data))
+  data |>
+      dplyr::distinct(!!!syms(row), !!!syms(col), !!!syms(env), !!!syms(trt)) |>
+      dplyr::summarise(n = dplyr::n(),
+                       across(c(row, col, trt), ~ dplyr::n_distinct(.x), .names = "n{.col}"),
+                       # .row_min = min(as.numeric(as.character(.data[[row]]))),
+                       # .col_min = min(as.numeric(as.character(.data[[col]]))),
+                       # .row_max = max(as.numeric(as.character(.data[[row]]))),
+                       # .col_max = max(as.numeric(as.character(.data[[col]]))),
+                       .by = env)
+}
+
