@@ -26,3 +26,5 @@ check_input_size_1 <- function(x, xname = rlang::caller_arg(x)) {
 }
 
 
+
+mult_sign <- function() cli::symbol$times

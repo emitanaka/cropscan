@@ -80,19 +80,19 @@ as_field <- function(data, row = NULL, col = NULL, env = NULL, ...) {
 #' @importFrom tibble tbl_sum
 #' @export
 tbl_sum.field <- function(x, ...) {
-  c(NextMethod(), "Dimension" = paste0(max(as.integer(as.character(x[[x %@% ".row"]])), na.rm = TRUE), " rows ",
+  c(NextMethod(), "Dimension" = paste0(dplyr::n_distinct(x[[x %@% ".row"]]), " rows ",
                                        mult_sign(), " ",
-                                       max(as.integer(as.character(x[[x %@% ".col"]])), na.rm = TRUE), " cols ",
+                                       dplyr::n_distinct(x[[x %@% ".col"]]), " cols ",
                                        if(!is.null(x %@% ".env")) {
                                          nenvs <- x |>
                                            dplyr::distinct(!!!syms(x %@% ".env")) |>
                                            nrow()
                                          paste0(mult_sign(), " ", nenvs, " environments")
+                                         cli::cli_inform(c("i" = "Use `field_dim()` to get the field dimensions by environment."))
                                         }))
 }
 
 
-mult_sign <- function() cli::symbol$times
 
 
 
