@@ -9,6 +9,7 @@
 #' Marker data
 #'
 #' The marker information for the genotypes in the multi-environmental trial.
+#' The marker data is coded as -1, 0, or 1.
 #'
 #' @family met-data
 "met_marker"
