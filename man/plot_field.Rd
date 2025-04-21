@@ -9,9 +9,9 @@ plot_field(
   fill = NULL,
   row = NULL,
   col = NULL,
-  trial = NULL,
+  env = NULL,
   max_col = 40,
-  max_trial = 20,
+  max_env = 20,
   max_cat = 8
 )
 }
@@ -22,11 +22,11 @@ plot_field(
 
 \item{row, col}{The row and column name. If not supplied, it will try to detect one.}
 
-\item{trial}{The division of the trial.}
+\item{env}{The division of the env.}
 
-\item{max_col}{The maximum number of columns to plot in a row if more than one trial.}
+\item{max_col}{The maximum number of columns to plot in a row if more than one env.}
 
-\item{max_trial}{The maximum number of trials.}
+\item{max_env}{The maximum number of envs.}
 
 \item{max_cat}{The maximum number of categorical levels to plot (if fill is categorical).}
 }

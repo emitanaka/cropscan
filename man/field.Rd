@@ -4,14 +4,14 @@
 \alias{field}
 \title{Construct a rectangular field}
 \usage{
-field(nrow = 1, ncol = 1, ntrial = 1)
+field(nrow = 1, ncol = 1, nenv = 1)
 }
 \arguments{
 \item{nrow}{The number of rows.}
 
 \item{ncol}{The number of columns.}
 
-\item{ntrial}{The number of trials.}
+\item{nenv}{The number of envs.}
 }
 \description{
 Construct a rectangular field

@@ -4,7 +4,7 @@
 \alias{cols_identify_all}
 \title{Identify all columns with potential issues}
 \usage{
-cols_identify_all(data, cutoff = 1, na.rm = FALSE)
+cols_identify_all(data, cutoff = 1, na.rm = FALSE, print = TRUE)
 }
 \arguments{
 \item{data}{The data frame}
@@ -12,6 +12,8 @@ cols_identify_all(data, cutoff = 1, na.rm = FALSE)
 \item{cutoff}{The minimum cutoff for the proportion of missing values.}
 
 \item{na.rm}{Should missing values be removed?}
+
+\item{print}{Print the output or not.}
 }
 \description{
 Identify all columns with potential issues
