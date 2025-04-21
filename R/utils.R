@@ -17,3 +17,12 @@ count_ceil <- function(x, total = 0, i = 1, max = 30) {
     }
   }
 }
+
+
+check_input_size_1 <- function(x, xname = rlang::caller_arg(x)) {
+  if(length(x) != 1) {
+    cli::cli_abort("{.arg {xname}} must be of length 1")
+  }
+}
+
+
