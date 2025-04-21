@@ -2,7 +2,7 @@
 % Please edit documentation in R/field.R
 \name{field}
 \alias{field}
-\title{Construct a rectangular field}
+\title{Construct a (set of) rectangular field}
 \usage{
 field(nrow = 1, ncol = 1, nenv = 1)
 }

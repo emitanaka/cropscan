@@ -1,5 +1,5 @@
 
-#' Construct a rectangular field
+#' Construct a (set of) rectangular field
 #'
 #' The function constructs a rectangular field with the specified number of rows, columns, and environments.
 #' If `nrow` or `ncol` is a vector of length greater than 1, then each element is assumed to be an environment.
