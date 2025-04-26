@@ -25,7 +25,7 @@ detect_yield_name <- function(.data) {
 }
 
 
-detect_genotype_name <- function(.data) {
+detect_genotype_name <- detect_gen_name <- function(.data) {
   res <- detect_name(.data, c("genotype", "gen", "line"), "genotype", error = FALSE)
   if(length(res) == 0) {
     tt <- sapply(.data, function(x) inherits(x, "character") | inherits(x, "factor"))

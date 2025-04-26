@@ -9,27 +9,32 @@
 #' @param nrow The number of rows. Must be a vector of the same size as `ncol` or 1.
 #' @param ncol The number of columns. Must be a vector of the same size as `nrow` or 1.
 #' @param nenv The number of environments. Unused if `nrow` or `ncol` is a vector of size greater than 1.
+#' @param ngen The number of genotypes.
 #' @examples
 #' field(12, 8) # A field of 12 rows x 8 columns.
 #' field(12, 8, 3) # Three fields of 12 rows x 8 columns.
 #' field(c(12, 8), 6) # Two fields of 12 rows x 6 columns and 8 rows x 6 columns.
 #' field(c(4, 3), c(5, 4)) # Two fields of 4 rows x 5 columns and 3 rows x 4 columns.
 #' @export
-field <- function(nrow = 1, ncol = 1, nenv = 1) {
+field <- function(nrow = 1, ncol = 1, nenv = 1, ngen = round(nrow * ncol / 2)) {
   if(length(nrow) == 1 & length(ncol) == 1 & length(nenv) == 1) {
     if(nenv >= 2) {
       res <- expand.grid(row = factor(1:nrow), col = factor(1:ncol), env = factor(1:nenv))
+      res$gen <- factor(sample(1:ngen, replace = TRUE, size = nrow(res)))
       tibble::new_tibble(res,
                          class = "field",
                          .row = "row",
                          .col = "col",
-                         .env = "env")
+                         .env = "env",
+                         .gen = "gen")
     } else if(nenv == 1) {
       res <- expand.grid(row = factor(1:nrow), col = factor(1:ncol))
+      res$gen <- factor(sample(1:ngen, replace = TRUE, size = nrow(res)))
       tibble::new_tibble(res,
                          class = "field",
                          .row = "row",
-                         .col = "col")
+                         .col = "col",
+                         .gen = "gen")
     }
   } else if(length(nrow) > 1 | length(ncol) > 1) {
     dims <- vctrs::vec_recycle_common(nrow, ncol)
@@ -43,11 +48,13 @@ field <- function(nrow = 1, ncol = 1, nenv = 1) {
     res$row <- factor(res$row)
     res$col <- factor(res$col)
     res$env <- factor(res$env)
+    res$gen <- factor(sample(1:ngen, replace = TRUE, size = nrow(res)))
     tibble::new_tibble(res,
                        class = "field",
                        .row = "row",
                        .col = "col",
-                       .env = "env")
+                       .env = "env",
+                       .gen = "gen")
 
   } else {
     cli::cli_abort("Invalid input: {.arg nenv} must be of length 1.")
@@ -62,34 +69,45 @@ field <- function(nrow = 1, ncol = 1, nenv = 1) {
 #' @param row A column name or expression to be used as the row identifier.
 #' @param col A column name or expression to be used as the column identifier.
 #' @param env A column name or expression to be used as the environment identifier.
+#' @param gen A column name or expression to be used as the genotype identifier.
 #' @param ... Not used.
 #'
 #' @export
-as_field <- function(data, row = NULL, col = NULL, env = NULL, ...) {
+as_field <- function(data, row = NULL, col = NULL, env = NULL, gen = NULL, ...) {
   colq <- names(eval_select(enexpr(col), data)) %0% detect_col_name(data)
   rowq <- names(eval_select(enexpr(row), data)) %0% detect_row_name(data)
   envq <- names(eval_select(enexpr(env), data)) %0% detect_env_name(data) %0% NULL
+  genq <- names(eval_select(enexpr(gen), data)) %0% detect_gen_name(data) %0% NULL
+  if(!is_observational_unit(data, !!!syms(c(rowq, colq, envq)), .message = FALSE)) {
+    cli::cli_alert("The row and col (and env) do not identify the observational unit.")
+  }
   tibble::new_tibble(data,
                      class = "field",
                      .row = rowq,
                      .col = colq,
-                     .env = envq)
+                     .env = envq,
+                     .gen = genq)
 }
 
 
 #' @importFrom tibble tbl_sum
 #' @export
 tbl_sum.field <- function(x, ...) {
-  c(NextMethod(), "Dimension" = paste0(dplyr::n_distinct(x[[x %@% ".row"]]), " rows ",
+  out <- c(NextMethod(), "Dimension" = paste0(dplyr::n_distinct(x[[x %@% ".row"]]), " rows ",
                                        mult_sign(), " ",
                                        dplyr::n_distinct(x[[x %@% ".col"]]), " cols ",
                                        if(!is.null(x %@% ".env")) {
                                          nenvs <- x |>
                                            dplyr::distinct(!!!syms(x %@% ".env")) |>
                                            nrow()
-                                         paste0(mult_sign(), " ", nenvs, " environments")
                                          cli::cli_inform(c("i" = "Use `field_dim()` to get the field dimensions by environment."))
+                                         paste0(mult_sign(), " ", nenvs, " environments")
                                         }))
+  if(!is.null(x %@% ".gen")) {
+    out <- c(out, "Genotypes" = paste0(dplyr::n_distinct(x[[x %@% ".gen"]]), " genotypes"))
+  }
+
+  out
 }
 
 
