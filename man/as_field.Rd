@@ -4,7 +4,7 @@
 \alias{as_field}
 \title{Add the field class to a data frame}
 \usage{
-as_field(data, row = NULL, col = NULL, env = NULL, ...)
+as_field(data, row = NULL, col = NULL, env = NULL, gen = NULL, ...)
 }
 \arguments{
 \item{data}{A data frame to be converted to a field.}
@@ -14,6 +14,8 @@ as_field(data, row = NULL, col = NULL, env = NULL, ...)
 \item{col}{A column name or expression to be used as the column identifier.}
 
 \item{env}{A column name or expression to be used as the environment identifier.}
+
+\item{gen}{A column name or expression to be used as the genotype identifier.}
 
 \item{...}{Not used.}
 }
