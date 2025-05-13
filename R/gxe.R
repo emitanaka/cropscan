@@ -50,7 +50,7 @@ print.concurrence_mat <- function(x, n = 10, ...) {
 #' @rdname concurrence_matrix
 #' @export
 concurrence_table <- function(data, gen = NULL, env = NULL) {
-  mat <- concurrence_matrix(data, gen, env)
+  mat <- concurrence_matrix(data, {{gen}}, {{env}})
   res <- as.data.frame(mat)
   res <- res |>
     tibble::rownames_to_column("env1") |>
