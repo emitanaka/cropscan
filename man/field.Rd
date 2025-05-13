@@ -4,7 +4,7 @@
 \alias{field}
 \title{Construct a (set of) rectangular field}
 \usage{
-field(nrow = 1, ncol = 1, nenv = 1)
+field(nrow = 1, ncol = 1, nenv = 1, ngen = round(nrow * ncol/2))
 }
 \arguments{
 \item{nrow}{The number of rows. Must be a vector of the same size as \code{ncol} or 1.}
@@ -12,6 +12,8 @@ field(nrow = 1, ncol = 1, nenv = 1)
 \item{ncol}{The number of columns. Must be a vector of the same size as \code{nrow} or 1.}
 
 \item{nenv}{The number of environments. Unused if \code{nrow} or \code{ncol} is a vector of size greater than 1.}
+
+\item{ngen}{The number of genotypes.}
 }
 \description{
 The function constructs a rectangular field with the specified number of rows, columns, and environments.
